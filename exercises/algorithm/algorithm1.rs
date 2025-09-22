@@ -2,11 +2,11 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
+
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
-use std::vec::*;
+// use std::vec::*;
 
 #[derive(Debug)]
 struct Node<T> {
@@ -29,12 +29,6 @@ struct LinkedList<T> {
     end: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Default for LinkedList<T> {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl<T> LinkedList<T> {
     pub fn new() -> Self {
         Self {
@@ -43,7 +37,15 @@ impl<T> LinkedList<T> {
             end: None,
         }
     }
+}
 
+impl<T> Default for LinkedList<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl<T: Clone> LinkedList<T> {
     pub fn add(&mut self, obj: T) {
         let mut node = Box::new(Node::new(obj));
         node.next = None;
@@ -55,7 +57,129 @@ impl<T> LinkedList<T> {
         self.end = node_ptr;
         self.length += 1;
     }
+}
 
+// impl<T: Clone> LinkedList<T> {
+//     pub fn new() -> Self {
+//         Self {
+//             length: 0,
+//             start: None,
+//             end: None,
+//         }
+//     }
+
+//     pub fn add(&mut self, obj: T) {
+//         let mut node = Box::new(Node::new(obj));
+//         node.next = None;
+//         let node_ptr = Some(unsafe { NonNull::new_unchecked(Box::into_raw(node)) });
+//         match self.end {
+//             None => self.start = node_ptr,
+//             Some(end_ptr) => unsafe { (*end_ptr.as_ptr()).next = node_ptr },
+//         }
+//         self.end = node_ptr;
+//         self.length += 1;
+//     }
+
+//     pub fn get(&mut self, index: i32) -> Option<&T> {
+//         self.get_ith_node(self.start, index)
+//     }
+
+//     fn get_ith_node(&mut self, node: Option<NonNull<Node<T>>>, index: i32) -> Option<&T> {
+//         match node {
+//             None => None,
+//             Some(next_ptr) => match index {
+//                 0 => Some(unsafe { &(*next_ptr.as_ptr()).val }),
+//                 _ => self.get_ith_node(unsafe { (*next_ptr.as_ptr()).next }, index - 1),
+//             },
+//         }
+//     }
+// 	// pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
+// 	// {
+// 	// 	//TODO
+// 	// 	Self {
+//     //         length: 0,
+//     //         start: None,
+//     //         end: None,
+//     //     }
+// 	// }
+//     // 合并两个有序链表的实现
+//     pub fn merge(mut list_a: LinkedList<T>, mut list_b: LinkedList<T>) -> Self
+//     where
+//         T: Ord,
+//     {
+//         let mut result = LinkedList::new();
+//         let mut a_current = list_a.start;
+//         let mut b_current = list_b.start;
+
+//         // 遍历两个链表，比较并合并
+//         while let (Some(a_ptr), Some(b_ptr)) = (a_current, b_current) {
+//             let a_node = unsafe { a_ptr.as_ref() };
+//             let b_node = unsafe { b_ptr.as_ref() };
+
+//             if a_node.val <= b_node.val {
+//                 // 从链表a中取节点
+//                 result.add(a_node.val.clone());
+//                 a_current = a_node.next;
+//             } else {
+//                 // 从链表b中取节点
+//                 result.add(b_node.val.clone());
+//                 b_current = b_node.next;
+//             }
+//         }
+
+//         // 处理剩余的节点
+//         while let Some(a_ptr) = a_current {
+//             let a_node = unsafe { a_ptr.as_ref() };
+//             result.add(a_node.val.clone());
+//             a_current = a_node.next;
+//         }
+
+//         while let Some(b_ptr) = b_current {
+//             let b_node = unsafe { b_ptr.as_ref() };
+//             result.add(b_node.val.clone());
+//             b_current = b_node.next;
+//         }
+
+//         result
+//     }
+// }
+
+impl<T: Ord + Clone> LinkedList<T> {
+    pub fn merge(list_a: LinkedList<T>, list_b: LinkedList<T>) -> Self {
+        let mut result = LinkedList::new();
+        let mut a_current = list_a.start;
+        let mut b_current = list_b.start;
+
+        while let (Some(a_ptr), Some(b_ptr)) = (a_current, b_current) {
+            let a_node = unsafe { a_ptr.as_ref() };
+            let b_node = unsafe { b_ptr.as_ref() };
+
+            if a_node.val <= b_node.val {
+                result.add(a_node.val.clone());
+                a_current = a_node.next;
+            } else {
+                result.add(b_node.val.clone());
+                b_current = b_node.next;
+            }
+        }
+
+        while let Some(a_ptr) = a_current {
+            let a_node = unsafe { a_ptr.as_ref() };
+            result.add(a_node.val.clone());
+            a_current = a_node.next;
+        }
+
+        while let Some(b_ptr) = b_current {
+            let b_node = unsafe { b_ptr.as_ref() };
+            result.add(b_node.val.clone());
+            b_current = b_node.next;
+        }
+
+        result
+    }
+}
+
+impl<T> LinkedList<T> {
     pub fn get(&mut self, index: i32) -> Option<&T> {
         self.get_ith_node(self.start, index)
     }
@@ -69,15 +193,6 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
-	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
-        }
-	}
 }
 
 impl<T> Display for LinkedList<T>
@@ -103,6 +218,16 @@ where
         }
     }
 }
+
+// // 为了支持clone操作，以便在合并时复制节点值
+// impl<T: Clone> Clone for Node<T> {
+//     fn clone(&self) -> Self {
+//         Node {
+//             val: self.val.clone(),
+//             next: None, // 克隆时不复制next指针，只复制值
+//         }
+//     }
+// }
 
 #[cfg(test)]
 mod tests {
